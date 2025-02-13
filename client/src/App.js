@@ -76,7 +76,7 @@ function AppContent() {
 
   return (
     <AuthContext.Provider value={{ isAuthenticated, setIsAuthenticated, isAdmin, setIsAdmin, user, setUser, handleLogout }}>
-      <Router>
+      
         <Routes>
           {/* ✅ Home Page as Default */}
           <Route path="/" element={<Home />} />
@@ -114,7 +114,7 @@ function AppContent() {
           {/* Redirect all unknown routes to home */}
           <Route path="*" element={<Navigate to="/" />} />
         </Routes>
-      </Router>
+      
     </AuthContext.Provider>
   );
 }
