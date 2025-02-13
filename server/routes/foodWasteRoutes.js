@@ -1,7 +1,7 @@
 const express = require("express");
 const router = express.Router();
 const { supabase } = require("../db");
-const schedule = require("node-schedule"); // ✅ For automatic scheduling
+const schedule = require("node-schedule"); // For automatic scheduling
 
 // ✅ Waste Summary Route
 router.get("/waste-summary/:userId", async (req, res) => {
@@ -100,7 +100,7 @@ router.get("/weekly-waste/:userId", async (req, res) => {
         }
 
         if (!data || data.length === 0) {
-            console.log(`⚠️ No weekly waste data found for user ${userId}`);
+            console.log(`⚠ No weekly waste data found for user ${userId}`);
             return res.status(404).json({ message: "No weekly waste data found" });
         }
 
@@ -134,16 +134,17 @@ const storeWeeklyWaste = async () => {
 
         let expiredWasteByUser = {};
         expiredData.forEach(item => {
-            const totalCost = item.price * item.quantity;
-            expiredWasteByUser[item.userid] = (expiredWasteByUser[item.userid] || 0) + totalCost;
+            if (item.price && item.quantity && item.userid) {
+                const totalCost = item.price * item.quantity;
+                expiredWasteByUser[item.userid] = (expiredWasteByUser[item.userid] || 0) + totalCost;
+            }
         });
 
         // Fetch portion waste
         const { data: portionData, error: portionError } = await supabase
-        .from("calculations")
-        .select("userid, portionwasted, calculatedat") 
-        .gte("calculatedat", pastWeekDate.toISOString()); 
-    
+            .from("calculations")
+            .select("userid, portionwasted, calculatedat") // Use correct column name: calculatedat
+            .gte("calculatedat", pastWeekDate.toISOString());
 
         if (portionError) {
             console.error("❌ Error fetching portion waste:", portionError);
@@ -152,7 +153,9 @@ const storeWeeklyWaste = async () => {
 
         let portionWasteByUser = {};
         portionData.forEach(item => {
-            portionWasteByUser[item.userid] = (portionWasteByUser[item.userid] || 0) + item.portionwasted;
+            if (item.portionwasted && item.userid) {
+                portionWasteByUser[item.userid] = (portionWasteByUser[item.userid] || 0) + item.portionwasted;
+            }
         });
 
         // Insert weekly waste summary
@@ -160,22 +163,22 @@ const storeWeeklyWaste = async () => {
             const expiredWaste = expiredWasteByUser[userId] || 0;
             const portionWaste = portionWasteByUser[userId] || 0;
 
+            const weekString = getCurrentWeek(new Date());
+
             const { error } = await supabase
-            .from("weekly_waste")
-            .upsert([{ 
-                userid: userId, 
-                week: weekString, 
-                expiredwaste: expiredWaste, 
-                portionwaste: portionWaste 
-            }], { onConflict: ['userid', 'week'] }); 
-        
-        
-        if (error) {
-            console.error(`❌ Error inserting weekly waste for user ${userId}:`, error);
-        } else {
-            console.log(`✅ Weekly waste stored for user ${userId}: Expired = ${expiredWaste}, Portion = ${portionWaste}`);
-        }
-        
+                .from("weekly_waste")
+                .upsert([{ 
+                    userid: userId, 
+                    week: weekString, 
+                    expiredwaste: expiredWaste, 
+                    portionwaste: portionWaste 
+                }], { onConflict: ['userid', 'week'] });
+
+            if (error) {
+                console.error(`❌ Error inserting weekly waste for user ${userId}:`, error);
+            } else {
+                console.log(`✅ Weekly waste stored for user ${userId}: Expired = ${expiredWaste}, Portion = ${portionWaste}`);
+            }
         }
     } catch (error) {
         console.error("❌ Error in weekly waste storage:", error.message);
@@ -200,16 +203,12 @@ router.get("/test-store-weekly", async (req, res) => {
     }
 });
 
-
-
-module.exports = router; 
-
-
-
-// Utility function to get current week number
+// Utility function to get current week number in YYYY-WW format
 const getCurrentWeek = (date) => {
     const startOfYear = new Date(date.getFullYear(), 0, 1);
     const pastDays = (date - startOfYear) / 86400000;
-    return Math.ceil((pastDays + startOfYear.getDay() + 1) / 7);
+    const weekNumber = Math.ceil((pastDays + startOfYear.getDay() + 1) / 7);
+    return `${date.getFullYear()}-W${weekNumber.toString().padStart(2, '0')}`;
 };
 
+module.exports = router;

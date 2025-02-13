@@ -72,11 +72,14 @@ router.put("/:userid/:groceryid", async (req, res) => {
       return res.status(400).json({ error: "User ID and Grocery ID are required" });
   }
 
+  const { error, value } = grocerySchema.validate(req.body);
+  if (error) return res.status(400).json({ error: error.details[0].message });
+
   try {
       const { data, error } = await supabase
           .from("groceries")
-          .update({ name, quantity, unit, price, date_of_expiry, date_of_purchase })
-          .eq("groceryid", groceryid)
+          .update(value)
+          .eq("id", groceryid)  // Updated to use "id" for grocery ID
           .eq("userid", userid)
           .select();
 
@@ -87,6 +90,5 @@ router.put("/:userid/:groceryid", async (req, res) => {
       res.status(500).json({ error: "Server error" });
   }
 });
-
 
 module.exports = router;

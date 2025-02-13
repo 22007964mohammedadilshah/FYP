@@ -45,9 +45,9 @@ const AboutUs = () => {
             <div style={styles.section}>
                 <FaGlobe style={styles.icon} />
                 <div style={styles.textContainer}>
-                    <h3 style={styles.title}>ABOUT US</h3>
+                    <h3 style={styles.title}>ABOUT OUR PROJECT</h3>
                     <p style={styles.text}>
-                        We are a social impact company that dreams of a planet with no food waste.
+                        An app were users can easily track their groceries, get recommended recipes and learn about their sustainable habits
                     </p>
                 </div>
             </div>
@@ -55,9 +55,9 @@ const AboutUs = () => {
             <div style={styles.section}>
                 <FaBalanceScale style={styles.icon} />
                 <div style={styles.textContainer}>
-                    <h3 style={styles.title}>ESG</h3>
+                    <h3 style={styles.title}>OUR PARTNERS</h3>
                     <p style={styles.text}>
-                        As a mission-driven company, we care about what we do and how we do it.
+                        Our 
                     </p>
                 </div>
             </div>

@@ -35,7 +35,7 @@ router.delete("/:id", async (req, res) => {
             .delete()
             .eq("userid", userId)
             .select("*");
-            // ✅ Ensure column name matches your Supabase database
+        
 
         if (error) {
             console.error("❌ Error deleting user:", error.message);
@@ -48,7 +48,7 @@ router.delete("/:id", async (req, res) => {
         }
 
         console.log("✅ User deleted successfully");
-        res.status(200).json({ message: "User deleted successfully" }); // ✅ Ensure response is sent
+        res.status(200).json({ message: "User deleted successfully" }); // 
     } catch (error) {
         console.error("❌ Server error:", error.message);
         res.status(500).json({ error: "Internal server error" });
@@ -59,17 +59,17 @@ router.delete("/:id", async (req, res) => {
 
 router.put("/:id/role", async (req, res) => {
     const userId = req.params.id;
-    const { role } = req.body; // ✅ Extract the new role from the request body
+    const { role } = req.body; 
 
     console.log(`🔄 Updating role for user ID: ${userId} to ${role}`);
 
     try {
-        // ✅ Update the user's role in Supabase
+        
         const { data, error } = await supabase
             .from("users")
-            .update({ role }) // ✅ Updates the "role" column
-            .eq("userid", userId) // ✅ Matches the correct user by ID
-            .select("*"); // ✅ Ensures updated data is returned
+            .update({ role }) 
+            .eq("userid", userId) 
+            .select("*"); 
 
         console.log("🛠 Supabase Response:", { data, error });
 
@@ -93,14 +93,14 @@ router.put("/:id/role", async (req, res) => {
 // ✅ Reset Password Route (Admin Only)
 router.put("/reset-password/:id", async (req, res) => {
     const { id } = req.params;
-    const newPassword = "Temp@123"; // ✅ Default temporary password
-    const hashedPassword = await bcrypt.hash(newPassword, 10); // ✅ Hash password
+    const newPassword = "Temp@123"; 
+    const hashedPassword = await bcrypt.hash(newPassword, 10); 
 
     try {
-        // ✅ Update password directly in PostgreSQL `users` table
+     
         const { data, error } = await supabase
             .from("users")
-            .update({ password: hashedPassword }) // ✅ Store hashed password
+            .update({ password: hashedPassword }) 
             .eq("userid", id);
 
         if (error) {
@@ -120,7 +120,7 @@ router.put("/reset-password/:id", async (req, res) => {
 
 router.put("/change-password/:userid", async (req, res) => {
     const { userid } = req.params;
-    const { newPassword } = req.body; // Only new password required
+    const { newPassword } = req.body; 
   
     try {
       // 1️⃣ Fetch user by userid (just to confirm they exist)

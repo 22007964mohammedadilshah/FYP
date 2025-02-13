@@ -10,6 +10,7 @@ function RecipeManager({ onRecipeAdded }) {
     steps: "",
     sustainability_notes: "",
     ingredients: [],
+   
   });
 
   const [ingredient, setIngredient] = useState({
