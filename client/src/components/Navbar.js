@@ -98,7 +98,7 @@ const Navbar = () => {
                     onMouseOut={(e) => (e.target.style.backgroundColor = styles.button.backgroundColor)}
                     onClick={() => navigate("/groceries")}
                 >
-                    Grocery Manager
+                    Add grocery
                 </button>
 
                 <button
@@ -107,7 +107,7 @@ const Navbar = () => {
                     onMouseOut={(e) => (e.target.style.backgroundColor = styles.button.backgroundColor)}
                     onClick={() => navigate("/inventory")}
                 >
-                    Inventory
+                    My Grocery
                 </button>
 
                 <button
@@ -116,7 +116,7 @@ const Navbar = () => {
                     onMouseOut={(e) => (e.target.style.backgroundColor = styles.button.backgroundColor)}
                     onClick={() => navigate("/cooking")}
                 >
-                    Cooking Manager
+                    Cook with us
                 </button>
 
                 <button
@@ -134,7 +134,7 @@ const Navbar = () => {
                     onMouseOut={(e) => (e.target.style.backgroundColor = styles.button.backgroundColor)}
                     onClick={() => navigate("/recipe-manager")}
                 >
-                    Recipe Manager
+                    Add recipes
                 </button>
 
                 {/* ✅ New Tab 2: Recipe Library (routed to RecipeInventory) */}

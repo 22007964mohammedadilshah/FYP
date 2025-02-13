@@ -1,7 +1,8 @@
-import React from "react";
+import React, { useState } from "react"; // Add useState import
 import { useNavigate } from "react-router-dom";
 
 const Home = () => {
+    const [showAbout, setShowAbout] = useState(false); // Declare the state and setter
     const navigate = useNavigate();
 
     const handleLoginClick = () => {
@@ -9,11 +10,11 @@ const Home = () => {
     };
 
     const handleTheAppClick = () => {
-        navigate("/the-app"); // ✅ Navigate to "The App" page
+        navigate("/the-app");
     };
 
     const handleAboutUsClick = () => {
-        navigate("/about-us"); // ✅ Navigate to "About Us" page
+        navigate("/about-us");
     };
 
     const styles = {
@@ -57,7 +58,22 @@ const Home = () => {
             border: "none",
             borderRadius: "5px",
             cursor: "pointer",
-            transition: "opacity 0.3s ease",
+            transition: "background-color 0.3s ease, transform 0.2s ease",
+        },
+        aboutUsButton: {
+            padding: "10px 15px",
+            fontSize: "16px",
+            fontWeight: "bold",
+            color: "white",
+            backgroundColor: "#2e856e",
+            border: "none",
+            borderRadius: "5px",
+            cursor: "pointer",
+            transition: "background-color 0.3s ease, transform 0.2s ease",
+        },
+        aboutUsHover: {
+            backgroundColor: "#1e6a53", // Darker green on hover
+            transform: "scale(1.05)",
         },
         loginButton: {
             padding: "10px 15px",
@@ -69,7 +85,7 @@ const Home = () => {
             borderRadius: "5px",
             cursor: "pointer",
             position: "absolute",
-            right: "40px",
+            right: "125px",
         },
         title: {
             fontSize: "48px",
@@ -97,14 +113,23 @@ const Home = () => {
             <div style={styles.navbar}>
                 <div style={styles.logoContainer}>
                     <img src="/images/logo.jpg" alt="Logo" style={{ width: "80px", height: "80px", borderRadius: "50%" }} />
-                    
-                    {/* ✅ Fixed navigation buttons */}
+
                     <button style={styles.navButton} onClick={handleTheAppClick}>
                         The App
                     </button>
-                    <button style={styles.navButton} onClick={handleAboutUsClick}>
-                        About Us
-                    </button>
+                    
+                    {/* ✅ About Us button with hover effect */}
+                    <div 
+                        style={styles.aboutSection} 
+                        onMouseOver={() => setShowAbout(true)} 
+                        onMouseOut={() => setShowAbout(false)}
+                    >
+                        <h2 style={styles.aboutTitle}>About Sustainable Bao</h2>
+                        <p style={styles.aboutText}>
+                            Sustainable Bao helps you track groceries, manage inventory, and reduce food waste efficiently. 
+                            Our mission is to promote sustainability and smarter food usage.
+                        </p>
+                    </div>
                 </div>
 
                 <button style={styles.loginButton} onClick={handleLoginClick}>

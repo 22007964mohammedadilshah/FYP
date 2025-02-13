@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from "react";
 import axios from "axios";
 import { PieChart, Pie, Cell, Tooltip, ResponsiveContainer, BarChart, Bar, XAxis, YAxis, Legend } from "recharts";
+import Navbar from "./Navbar";
 
 const FoodWasteGraphs = ({ userId }) => {
     const [wasteData, setWasteData] = useState([]); // ✅ Ensure it's an array
@@ -48,36 +49,47 @@ const FoodWasteGraphs = ({ userId }) => {
     };
     
 
-    const COLORS = ["#FF5733", "#3498DB"];
+    const COLORS = ["#0088FE", "#00C49F", "#FFBB28", "#FF8042"]; // Define COLORS array
 
     return (
-        <div style={{ width: "100%", textAlign: "center" }}>
-            <h3>Food Waste Breakdown</h3>
-            <ResponsiveContainer width="50%" height={300}>
-                <PieChart>
-                    <Pie data={wasteData} cx="50%" cy="50%" outerRadius={100} fill="#8884d8" label>
-                        {wasteData.map((entry, index) => (
-                            <Cell key={`cell-${index}`} fill={COLORS[index]} />
-                        ))}
-                    </Pie>
-                    <Tooltip />
-                </PieChart>
-            </ResponsiveContainer>
+        <div>
+            <Navbar /> {/* Navbar at the top */}
+            <div style={{ width: "100%", textAlign: "center" }}>
+                <h3>Food Waste Breakdown</h3>
+                <ResponsiveContainer width="50%" height={300}>
+                    <PieChart>
+                        <Pie
+                            data={wasteData}
+                            cx="50%"
+                            cy="50%"
+                            outerRadius={100}
+                            fill="#8884d8"
+                            dataKey="value" // Ensure dataKey matches your data structure
+                            label
+                        >
+                            {wasteData.map((entry, index) => (
+                                <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />
+                            ))}
+                        </Pie>
+                        <Tooltip />
+                    </PieChart>
+                </ResponsiveContainer>
 
-            <h3>Weekly Waste Breakdown</h3>
-            <ResponsiveContainer width="80%" height={300}>
-    <BarChart data={weeklyWaste}>
-        <XAxis dataKey="week" />
-        <YAxis />
-        <Tooltip />
-        <Legend />
-        <Bar dataKey="expiredWaste" stackId="a" fill="#FF5733" name="Expired Waste" />
-        <Bar dataKey="portionWaste" stackId="a" fill="#3498DB" name="Portion Waste" />
-    </BarChart>
-</ResponsiveContainer>
-
+                <h3>Weekly Waste Breakdown</h3>
+                <ResponsiveContainer width="80%" height={300}>
+                    <BarChart data={weeklyWaste}>
+                        <XAxis dataKey="week" />
+                        <YAxis />
+                        <Tooltip />
+                        <Legend />
+                        <Bar dataKey="expiredWaste" fill="#FF5733" name="Expired Waste" />
+                        <Bar dataKey="portionWaste" fill="#3498DB" name="Portion Waste" />
+                    </BarChart>
+                </ResponsiveContainer>
+            </div>
         </div>
     );
 };
+
 
 export default FoodWasteGraphs;
