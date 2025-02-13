@@ -22,7 +22,7 @@ steps:
     args: ['run', 'deploy', 'fyp',  # 'my-app' is the name of your Cloud Run service
            '--image', 'gcr.io/$PROJECT_ID/placeholder-1',  # Name of the container image to deploy
            '--platform', 'managed',
-           '--region', 'asia-southeast1',  # Change to your preferred region
+           '--region', 'us-central1',  # Change to your preferred region
            '--allow-unauthenticated']
     dir: '.'  # Ensure the command is executed from the root directory
 
