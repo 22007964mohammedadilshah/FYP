@@ -20,13 +20,13 @@ steps:
   # Step 4: Deploy to Google Cloud Run
   - name: 'gcr.io/cloud-builders/gcloud'
     args: ['run', 'deploy', 'fyp',  # 'my-app' is the name of your Cloud Run service
-           '--image', 'gcr.io/$PROJECT_ID/fyp',  # Name of the container image to deploy
+           '--image', 'gcr.io/$PROJECT_ID/placeholder-1',  # Name of the container image to deploy
            '--platform', 'managed',
-           '--region', 'us-central1',  # Change to your preferred region
+           '--region', 'asia-southeast1',  # Change to your preferred region
            '--allow-unauthenticated']
     dir: '.'  # Ensure the command is executed from the root directory
 
 images:
-  - 'gcr.io/$PROJECT_ID/fyp'  # Container image name to push to Artifact Registry
+  - 'gcr.io/$PROJECT_ID/placeholder-1'  # Container image name to push to Artifact Registry
 
 timeout: 1200s  # Optional: Timeout for the build, adjust based on your project size
