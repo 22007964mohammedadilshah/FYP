@@ -64,7 +64,7 @@ function CookingManager({ userId }) {
 
         try {
             console.log("Submitting waste data for recipe:", selectedRecipe.recipeid);
-            await axios.put(`http://localhost:5000/api/cook/waste/${selectedRecipe.calculationid}`, { portionwasted: parseFloat(portionWasted) });
+            await axios.put(`http://localhost:5000/api/cook/waste/${selectedRecipe.calculationid}, { portionwasted: parseFloat(portionWasted) }`);
             alert("Waste recorded successfully!");
         } catch (error) {
             console.error("Error recording waste:", error.response?.data || error.message);
@@ -147,12 +147,6 @@ function CookingManager({ userId }) {
 
             <h1 style={styles.title}>Cooking Manager</h1>
 
-            {/* ✅ Navigation Buttons */}
-            <div style={styles.navigationButtons}>
-                <button style={styles.navButton} onClick={() => navigate("/groceries")}>Grocery Manager</button>
-                <button style={styles.navButton} onClick={() => navigate("/inventory")}>Inventory</button>
-                <button style={styles.navButton} onClick={() => navigate("/user-dashboard")}>User Dashboard</button>
-            </div>
 
             <div style={styles.formGroup}>
                 <label style={styles.label}>Select Recipe:</label>

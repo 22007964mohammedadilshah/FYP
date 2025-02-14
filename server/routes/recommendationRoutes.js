@@ -57,7 +57,7 @@ router.get("/recommend/:userid", async (req, res) => {
                 // ✅ Trim spaces from both grocery names and recipe ingredient names
                 const allIngredientsAvailable = recipeIngredients.every((ingredient) =>
                     groceries.some((grocery) => 
-                        grocery.name.trim().toLowerCase() === ingredient.ingredient_name.trim().toLowerCase()
+                        grocery.name.trim().toLowerCase().includes(ingredient.ingredient_name.trim().toLowerCase()) // Change from equality to includes
                     )
                 );
 
