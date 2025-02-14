@@ -1,6 +1,6 @@
 import React from "react";
 import { useNavigate } from "react-router-dom";
-import logoImage from "./Logo.jpg"; // Ensure correct path
+import logoImage from "./Logo.jpg";
 import LogoutButton from "../components/LogoutButton";
 
 const Navbar = () => {
