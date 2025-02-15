@@ -38,13 +38,10 @@ try {
     app.use("/api/recommendations", require("./routes/recommendationRoutes"));
     app.use("/api/food-waste", require("./routes/foodWasteRoutes"));
     app.use("/api/upcoming-expiries", require("./routes/foodWasteRoutes"));
-    
-
-
-    console.log("✅ API routes loaded successfully!");
-} catch (error) {
-    console.error("❌ Error loading routes:", error);
+} catch (error) {  
+    console.error("❌ Error initializing routes:", error.message);
 }
+
 
 // ✅ Import and Schedule Weekly Waste Storage
 const { storeWeeklyWaste } = require("./routes/foodWasteRoutes");

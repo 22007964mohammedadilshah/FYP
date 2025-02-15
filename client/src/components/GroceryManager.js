@@ -35,7 +35,7 @@ function GroceryManager({ userId }) {
                 date_of_purchase: new Date(date_of_purchase).toISOString().split("T")[0],
             };
 
-            // ✅ FIXED: Corrected template literal syntax in axios request
+            
             await axios.post(`http://localhost:5000/api/groceries/${userId}`, formattedGrocery);
 
             showSuccess("✅ Grocery added successfully!");

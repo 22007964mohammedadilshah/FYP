@@ -112,7 +112,7 @@ router.get("/weekly-waste/:userId", async (req, res) => {
     }
 });
 
-// ✅ Automatically Store Weekly Waste (Runs Every Sunday at 00:00)
+
 const storeWeeklyWaste = async () => {
     try {
         console.log("🚀 Running scheduled weekly waste aggregation...");
@@ -120,7 +120,7 @@ const storeWeeklyWaste = async () => {
         const pastWeekDate = new Date();
         pastWeekDate.setDate(pastWeekDate.getDate() - 7);
 
-        // Fetch expired waste
+        // ✅ Fetch expired waste
         const { data: expiredData, error: expiredError } = await supabase
             .from("groceries")
             .select("userid, price, quantity, date_of_expiry")
@@ -132,6 +132,8 @@ const storeWeeklyWaste = async () => {
             return;
         }
 
+        console.log("🔍 Expired waste data:", expiredData);  // ✅ Debugging output
+
         let expiredWasteByUser = {};
         expiredData.forEach(item => {
             if (item.price && item.quantity && item.userid) {
@@ -140,16 +142,20 @@ const storeWeeklyWaste = async () => {
             }
         });
 
-        // Fetch portion waste
+        console.log("✅ Expired waste calculated:", expiredWasteByUser);
+
+        // ✅ Fetch portion waste
         const { data: portionData, error: portionError } = await supabase
             .from("calculations")
-            .select("userid, portionwasted, calculatedat") // Use correct column name: calculatedat
+            .select("userid, portionwasted, calculatedat")
             .gte("calculatedat", pastWeekDate.toISOString());
 
         if (portionError) {
             console.error("❌ Error fetching portion waste:", portionError);
             return;
         }
+
+        console.log("🔍 Portion waste data:", portionData);  // ✅ Debugging output
 
         let portionWasteByUser = {};
         portionData.forEach(item => {
@@ -158,26 +164,30 @@ const storeWeeklyWaste = async () => {
             }
         });
 
-        // Insert weekly waste summary
+        console.log("✅ Portion waste calculated:", portionWasteByUser);
+
+        // ✅ Insert weekly waste summary
         for (let userId of Object.keys(expiredWasteByUser)) {
             const expiredWaste = expiredWasteByUser[userId] || 0;
             const portionWaste = portionWasteByUser[userId] || 0;
 
             const weekString = getCurrentWeek(new Date());
 
+            console.log(`📝 Storing weekly waste for user ${userId}: Week=${weekString}, Expired=${expiredWaste}, Portion=${portionWaste}`);
+
             const { error } = await supabase
-                .from("weekly_waste")
-                .upsert([{ 
-                    userid: userId, 
-                    week: weekString, 
-                    expiredwaste: expiredWaste, 
-                    portionwaste: portionWaste 
-                }], { onConflict: ['userid', 'week'] });
+            .from("weekly_waste")
+            .upsert([{ 
+                userid: userId, 
+                week: weekString, 
+                expiredwaste: expiredWaste, 
+                portionwaste: portionWaste 
+            }], { onConflict: 'userid, week' }); 
 
             if (error) {
                 console.error(`❌ Error inserting weekly waste for user ${userId}:`, error);
             } else {
-                console.log(`✅ Weekly waste stored for user ${userId}: Expired = ${expiredWaste}, Portion = ${portionWaste}`);
+                console.log(`✅ Successfully stored weekly waste for user ${userId}`);
             }
         }
     } catch (error) {
@@ -185,13 +195,14 @@ const storeWeeklyWaste = async () => {
     }
 };
 
+
 // Schedule the job to run every Sunday at midnight (00:00)
 schedule.scheduleJob("0 0 * * 0", async () => {
     console.log("⏳ Running scheduled job to store weekly waste...");
     await storeWeeklyWaste();
 });
 
-// ✅ Test Route: Manually Trigger Weekly Waste Storage
+
 router.get("/test-store-weekly", async (req, res) => {
     try {
         console.log("🚀 Manually triggering weekly waste storage...");
@@ -203,7 +214,7 @@ router.get("/test-store-weekly", async (req, res) => {
     }
 });
 
-// Utility function to get current week number in YYYY-WW format
+
 const getCurrentWeek = (date) => {
     const startOfYear = new Date(date.getFullYear(), 0, 1);
     const pastDays = (date - startOfYear) / 86400000;

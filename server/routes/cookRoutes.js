@@ -15,7 +15,7 @@ router.post("/", async (req, res) => {
         // ✅ Fetch all groceries for debugging (Fixed column name)
         const { data: allGroceries, error: allGroceriesError } = await supabase
             .from("groceries")
-            .select("groceryid, name, quantity, unit, date_of_purchase") // ✅ Fixed column name
+            .select("groceryid, name, quantity, unit, date_of_purchase") 
             .eq("userid", userid);
 
         if (allGroceriesError) {
@@ -42,13 +42,13 @@ router.post("/", async (req, res) => {
             console.log(`🔹 Deducting ${usedAmount} ${unit} of ${ingredient_name} using FIFO`);
             console.log(`🔍 Checking stock for: "${ingredient_name}" (Formatted: "${formattedIngredientName}")`);
 
-            // ✅ Fetch grocery stock (Fixed column name `date_of_purchase`)
+            
             const { data: groceries, error: fetchError } = await supabase
                 .from("groceries")
-                .select("groceryid, name, quantity, unit, date_of_purchase") // ✅ Fixed column name
+                .select("groceryid, name, quantity, unit, date_of_purchase") 
                 .eq("userid", userid)
                 .ilike("name", formattedIngredientName)
-                .order("date_of_purchase", { ascending: true }); // ✅ Fixed column name
+                .order("date_of_purchase", { ascending: true }); 
 
             console.log(`🔍 Retrieved groceries for ${formattedIngredientName}:`, groceries);
 
@@ -67,7 +67,7 @@ router.post("/", async (req, res) => {
 
                 if (stockAvailable <= 0) continue;
 
-                // Convert kg → g if necessary before deduction
+                
                 if (stockUnit === "kg") {
                     stockAvailable *= 1000;
                     stockUnit = "g";
@@ -121,7 +121,7 @@ router.post("/", async (req, res) => {
             }
         }
 
-        // ✅ Insert cooking event into `calculations` table
+        
         const { data, error } = await supabase
             .from("calculations")
             .insert([
@@ -140,14 +140,45 @@ router.post("/", async (req, res) => {
             return res.status(500).json({ error: "Failed to save cooking data", details: error.message });
         }
 
-        res.status(200).json({
-            message: "Cooking process completed!",
-            calculationid: data[0].calculationid
-        });
+        
+        
     } catch (err) {
         console.error("❌ Server Error:", err);
         res.status(500).json({ error: "Server error", details: err.message });
     }
 });
+
+
+router.put("/waste/:calculationid", async (req, res) => {
+    const { calculationid } = req.params;
+    const { portionwasted } = req.body;
+
+    if (!calculationid || portionwasted === undefined) {
+        return res.status(400).json({ error: "Missing calculation ID or portion wasted" });
+    }
+
+    try {
+        console.log(`🔹 Updating waste for calculation ID: ${calculationid}`);
+
+        // ✅ Update the calculations table with the waste portion
+        const { data, error } = await supabase
+            .from("calculations")
+            .update({ portionwasted: portionwasted })
+            .eq("calculationid", calculationid)
+            .select();
+
+        if (error) {
+            console.error("❌ Supabase Error:", error);
+            return res.status(500).json({ error: "Failed to update waste", details: error.message });
+        }
+
+        res.status(200).json({ message: "Waste recorded successfully!" });
+    } catch (err) {
+        console.error("❌ Server Error:", err);
+        res.status(500).json({ error: "Server error", details: err.message });
+    }
+});
+
+
 
 module.exports = router;

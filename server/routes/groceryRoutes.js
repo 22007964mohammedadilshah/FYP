@@ -52,43 +52,95 @@ router.post("/:userid", validateUserId, async (req, res) => {
 });
 
 // ✅ DELETE Grocery
+// ✅ DELETE Grocery - FIXED
 router.delete("/:userid/:groceryid", validateUserId, async (req, res) => {
     const { userid, groceryid } = req.params;
 
     try {
-        await supabase.from("groceries").delete().eq("id", groceryid).eq("userid", userid);
+        const { error } = await supabase.from("groceries").delete().eq("groceryid", groceryid).eq("userid", userid);
+
+        if (error) return res.status(500).json({ error: "Database error" });
+
         res.status(200).json({ message: "✅ Grocery deleted successfully" });
     } catch (error) {
         res.status(500).json({ error: "Server error" });
     }
 });
 
-// ✅ PUT: Update a grocery item by userId & groceryId
+
+
 router.put("/:userid/:groceryid", async (req, res) => {
-  const { userid, groceryid } = req.params;
-  const { name, quantity, unit, price, date_of_expiry, date_of_purchase } = req.body;
-
-  if (!userid || !groceryid) {
-      return res.status(400).json({ error: "User ID and Grocery ID are required" });
-  }
-
-  const { error, value } = grocerySchema.validate(req.body);
-  if (error) return res.status(400).json({ error: error.details[0].message });
-
-  try {
+    const { userid, groceryid } = req.params;
+    const { error, value } = grocerySchema.validate(req.body);
+    
+    if (error) return res.status(400).json({ error: error.details[0].message });
+  
+    try {
+      console.log(`🛠 Checking if Grocery exists: UserID=${userid}, GroceryID=${groceryid}`);
+      
+      // ✅ Ensure grocery exists before updating
+      const { data: existingGrocery, error: fetchError } = await supabase
+        .from("groceries")
+        .select("*")
+        .eq("groceryid", groceryid) 
+        .eq("userid", userid)
+        .single();
+      
+      if (fetchError || !existingGrocery) {
+        return res.status(404).json({ error: "❌ Grocery not found" });
+      }
+  
+      console.log(`✅ Grocery found, proceeding with update`);
+  
+      // ✅ Perform the update
       const { data, error } = await supabase
-          .from("groceries")
-          .update(value)
-          .eq("id", groceryid)  // Updated to use "id" for grocery ID
-          .eq("userid", userid)
-          .select();
-
-      if (error) return res.status(500).json({ error: "Database error" });
-
+        .from("groceries")
+        .update(value)
+        .eq("groceryid", groceryid) 
+        .eq("userid", userid)
+        .select();
+  
+      if (error) return res.status(500).json({ error: "❌ Database error" });
+  
       res.status(200).json({ message: "✅ Grocery updated successfully", grocery: data });
-  } catch (error) {
+    } catch (err) {
+      console.error("❌ Server Error:", err);
+      res.status(500).json({ error: "❌ Server error" });
+    }
+  });
+  
+  
+
+
+router.get("/:userid/:groceryid", async (req, res) => {
+    const { userid, groceryid } = req.params;
+  
+    console.log(`🛠 Fetching Grocery: UserID=${userid}, GroceryID=${groceryid}`);
+  
+    if (!userid || !groceryid) {
+      return res.status(400).json({ error: "User ID and Grocery ID are required" });
+    }
+  
+    try {
+      const { data, error } = await supabase
+        .from("groceries")
+        .select("*")
+        .eq("groceryid", groceryid)  
+        .eq("userid", userid)
+        .single();
+  
+      if (error || !data) {
+        console.error("❌ Supabase Error:", error);
+        return res.status(404).json({ error: "Grocery not found" });
+      }
+  
+      res.status(200).json(data);
+    } catch (err) {
+      console.error("❌ Server Error:", err);
       res.status(500).json({ error: "Server error" });
-  }
+    }
 });
+
+  
 
 module.exports = router;

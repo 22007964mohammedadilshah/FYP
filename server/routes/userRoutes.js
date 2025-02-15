@@ -1,18 +1,18 @@
 const express = require("express");
 const router = express.Router();
-const { getUsers } = require("../db"); // ✅ Ensure correct import
-const { supabase } = require("../db");  // ✅ Ensure Supabase is imported correctly
+const { getUsers } = require("../db"); 
+const { supabase } = require("../db");  
 const bcrypt = require("bcrypt");
 
 // ✅ Debugging Log
 console.log("✅ userRoutes.js loaded!");
 
 router.get("/", async (req, res) => {
-    console.log("🔹 Received request: GET /api/users");  // ✅ Log incoming requests
+    console.log("🔹 Received request: GET /api/users");  
 
     try {
         const users = await getUsers();
-        console.log("🔍 Supabase Response:", users);  // ✅ Log fetched users
+        console.log("🔍 Supabase Response:", users);  
 
         if (!users || users.length === 0) {
             return res.status(404).json({ error: "No users found" });
@@ -55,40 +55,60 @@ router.delete("/:id", async (req, res) => {
     }
 });
 
-// Change user roles
+router.put("/:userid/:groceryid", async (req, res) => {
+    const { userid, groceryid } = req.params;
+    console.log(`🛠 Checking if Grocery exists: UserID=${userid}, GroceryID=${groceryid}`);
 
-router.put("/:id/role", async (req, res) => {
-    const userId = req.params.id;
-    const { role } = req.body; 
-
-    console.log(`🔄 Updating role for user ID: ${userId} to ${role}`);
+    if (!userid || !groceryid) {
+        return res.status(400).json({ error: "User ID and Grocery ID are required" });
+    }
 
     try {
-        
-        const { data, error } = await supabase
-            .from("users")
-            .update({ role }) 
-            .eq("userid", userId) 
-            .select("*"); 
+        // ✅ First, check if the grocery exists before updating
+        const { data: existingGrocery, error: fetchError } = await supabase
+            .from("groceries")
+            .select("*")
+            .eq("groceryid", groceryid)
+            .eq("userid", userid)
+            .single();
 
-        console.log("🛠 Supabase Response:", { data, error });
+        if (fetchError || !existingGrocery) {
+            console.error("❌ Grocery Not Found in Database.");
+            return res.status(404).json({ error: "Grocery not found" });
+        }
 
+        console.log("✅ Grocery Found: ", existingGrocery);
+
+        // ✅ Validate Request Body
+        const { error, value } = grocerySchema.validate(req.body);
         if (error) {
-            console.error("❌ Error updating role:", error.message);
-            return res.status(500).json({ error: error.message });
+            console.error("❌ Validation Error:", error.details[0].message);
+            return res.status(400).json({ error: error.details[0].message });
         }
 
-        if (!data || data.length === 0) {
-            return res.status(404).json({ error: "User not found" });
+        // ✅ Proceed with update if grocery exists
+        const { data, error: updateError } = await supabase
+            .from("groceries")
+            .update(value)
+            .eq("groceryid", groceryid)
+            .eq("userid", userid)
+            .select();
+
+        if (updateError) {
+            console.error("❌ Database Error:", updateError);
+            return res.status(500).json({ error: "Database error" });
         }
 
-        console.log("✅ Role updated successfully:", data);
-        return res.status(200).json({ message: "User role updated successfully", updatedUser: data });
-    } catch (error) {
-        console.error("❌ Server error:", error.message);
-        return res.status(500).json({ error: "Internal server error" });
+        console.log("✅ Grocery Updated Successfully:", data);
+        res.status(200).json({ message: "✅ Grocery updated successfully", grocery: data });
+    } catch (err) {
+        console.error("❌ Server Error:", err);
+        res.status(500).json({ error: "Server error" });
     }
 });
+
+
+
 
 // ✅ Reset Password Route (Admin Only)
 router.put("/reset-password/:id", async (req, res) => {

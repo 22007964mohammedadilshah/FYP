@@ -13,6 +13,8 @@ const Inventory = () => {
     const [wasteSummary, setWasteSummary] = useState({ low: 0, medium: 0, high: 0, expired: 0 });
     const [totalWasteCost, setTotalWasteCost] = useState(0);
     const [wasteReductionTips, setWasteReductionTips] = useState([]);
+    const [editingGrocery, setEditingGrocery] = useState(null); 
+    const [showEditModal, setShowEditModal] = useState(false);  
 
     // Helper function to capitalize the first letter of a string
     const capitalizeFirstLetter = (str) => {
@@ -87,22 +89,41 @@ const Inventory = () => {
     const handleDeleteGrocery = async (groceryId) => {
         try {
             await axios.delete(`http://localhost:5000/api/groceries/${user.id}/${groceryId}`);
-            setGroceries(groceries.filter(item => item.groceryid !== groceryId)); // Update state
+            setGroceries((prev) => prev.filter(item => item.groceryid !== groceryId)); // ✅ Ensure `groceryid` is used
             alert("✅ Grocery deleted successfully!");
         } catch (error) {
             console.error("Error deleting grocery:", error.message);
             alert("❌ Failed to delete grocery.");
         }
     };
-
-    const handleEditGrocery = (groceryId) => {
+    
+    const handleEditGrocery = async (groceryId) => {
         if (!user || !user.id) {
             alert("❌ You must be logged in to edit a grocery.");
             navigate("/login");
-            return; 
+            return;
         }
-        navigate(`/edit-grocery/${groceryId}`);
+    
+        try {
+            const response = await fetch(`http://localhost:5000/api/groceries/${user.id}/${groceryId}`);
+            const data = await response.json();
+    
+            if (data.error) {
+                alert("❌ Grocery not found.");
+                return;
+            }
+    
+            
+            setEditingGrocery(data);
+            setShowEditModal(true);  
+        } catch (error) {
+            console.error("❌ Error fetching grocery for edit:", error);
+            alert("❌ Failed to fetch grocery details.");
+        }
     };
+    
+    
+    
 
    
     const sortedGroceries = [...groceries].sort((a, b) => new Date(a.createdat) - new Date(b.createdat));
@@ -174,6 +195,7 @@ const Inventory = () => {
                                             {isExpired ? 'Expired' : daysToExpiry >= 8 ? 'Low Risk' : daysToExpiry >= 4 ? 'Medium Risk' : 'High Risk'}
                                         </td>
                                         <td style={{ padding: '12px', border: '1px solid #ddd' }}>
+                                            
                                             <button onClick={() => handleEditGrocery(grocery.groceryid)} style={{ padding: '8px 16px', margin: '5px', cursor: 'pointer', border: 'none', backgroundColor: '#4CAF50', color: 'white' }}>Edit</button>
                                             <button onClick={() => handleDeleteGrocery(grocery.groceryid)} style={{ padding: '8px 16px', margin: '5px', cursor: 'pointer', border: 'none', backgroundColor: '#ff4d4d', color: 'white' }}>Delete</button>
                                         </td>
@@ -183,7 +205,7 @@ const Inventory = () => {
                         </tbody>
                     </table>
                 )}
-            </div>
+            </div>  
 
             {/* Right Side for Expired Products, Risk Summary, Waste Reduction Tips */}
             <div style={{ display: 'flex', flexDirection: 'row', gap: '20px', width: '100%', marginTop: '30px' }}>

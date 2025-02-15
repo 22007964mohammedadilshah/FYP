@@ -35,7 +35,7 @@ function RecipeInventory() {
     // Delete a recipe
     const handleDeleteRecipe = async (recipeId) => {
         try {
-            await axios.delete(`http://localhost:5000/api/recipes/${recipeId}`);
+            await axios.delete(`http://localhost:5000/api/recipes/${recipeId}`); // ✅ Fixed template literal
             fetchRecipes(); // Refresh the recipe list
         } catch (error) {
             console.error("❌ Error deleting recipe:", error);
@@ -54,14 +54,14 @@ function RecipeInventory() {
 
         try {
             const response = await axios.put(
-                `http://localhost:5000/api/recipes/${editRecipe.recipeid}`,
+                `http://localhost:5000/api/recipes/${editRecipe.recipeid}`, // ✅ Fixed template literal
                 editRecipe
             );
             console.log("✅ Update Response:", response.data);
             setEditRecipe(null); // Close the edit form
             fetchRecipes(); // Refresh the recipe list
         } catch (error) {
-            console.error("❌ Error updating recipe:", error.response?.data || error.message);
+            console.error("❌ Error updating recipe:", error.response?.data || error.message); // ✅ Improved error handling
             setError("Failed to update recipe. Please try again.");
         }
     };

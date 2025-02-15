@@ -34,11 +34,11 @@ const FoodWasteGraphs = ({ userId }) => {
             console.log("📊 Weekly Waste Data Received:", response.data);
     
             if (response.data.length > 0) {
-                // ✅ Convert database column names to match Recharts format
+                
                 const formattedData = response.data.map(item => ({
                     week: item.week,
-                    expiredWaste: item.expiredwaste,  // Convert lowercase to camelCase
-                    portionWaste: item.portionwaste   // Convert lowercase to camelCase
+                    expiredWaste: item.expiredwaste,  
+                    portionWaste: item.portionwaste   
                 }));
     
                 setWeeklyWaste(formattedData);
@@ -49,11 +49,11 @@ const FoodWasteGraphs = ({ userId }) => {
     };
     
 
-    const COLORS = ["#0088FE", "#00C49F", "#FFBB28", "#FF8042"]; // Define COLORS array
+    const COLORS = ["#0088FE", "#00C49F", "#FFBB28", "#FF8042"]; 
 
     return (
         <div>
-            <Navbar /> {/* Navbar at the top */}
+            <Navbar /> 
             <div style={{ width: "100%", textAlign: "center" }}>
                 <h3>Food Waste Breakdown</h3>
                 <ResponsiveContainer width="50%" height={300}>

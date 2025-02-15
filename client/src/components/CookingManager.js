@@ -8,7 +8,7 @@ function CookingManager({ userId }) {
     const [selectedRecipe, setSelectedRecipe] = useState(null);
     const [pax, setPax] = useState("");
     const [portionWasted, setPortionWasted] = useState("");
-    const navigate = useNavigate(); // ✅ Navigation Hook
+    const navigate = useNavigate(); 
 
     useEffect(() => {
         if (userId) {
@@ -40,7 +40,7 @@ function CookingManager({ userId }) {
             alert("Please select a recipe and enter the number of pax.");
             return;
         }
-
+    
         try {
             const response = await axios.post("http://localhost:5000/api/cook", {
                 userid: userId,
@@ -48,28 +48,56 @@ function CookingManager({ userId }) {
                 pax: parseInt(pax),
                 ingredientsUsed: selectedRecipe.grocerymatched
             });
-
+    
             alert(response.data.message);
+    
+            // ✅ Ensure the calculation ID is stored in `selectedRecipe`
+            if (response.data.calculationid) {
+                setSelectedRecipe(prevRecipe => ({
+                    ...prevRecipe,
+                    calculationid: response.data.calculationid
+                }));
+                console.log("✅ Updated Recipe with Calculation ID:", response.data.calculationid);
+            } else {
+                console.warn("⚠️ No calculation ID received from API.");
+            }
+    
             fetchRecommendations();
         } catch (error) {
             console.error("❌ Error cooking recipe:", error.response?.data || error.message);
         }
     };
+    
 
     const handleWasteSubmit = async () => {
         if (!selectedRecipe || !portionWasted) {
             alert("Please select a recipe and enter portion wasted.");
             return;
         }
-
+    
+        if (!selectedRecipe.calculationid) {
+            console.error("❌ Calculation ID is missing! Waste cannot be recorded.");
+            alert("Error: Calculation ID is missing. Please cook the recipe first.");
+            return;
+        }
+    
         try {
             console.log("Submitting waste data for recipe:", selectedRecipe.recipeid);
-            await axios.put(`http://localhost:5000/api/cook/waste/${selectedRecipe.calculationid}, { portionwasted: parseFloat(portionWasted) }`);
-            alert("Waste recorded successfully!");
+    
+            const response = await axios.put(
+                `http://localhost:5000/api/cook/waste/${selectedRecipe.calculationid}`, 
+                { portionwasted: parseFloat(portionWasted) },  
+                { headers: { "Content-Type": "application/json" } }  
+            );
+    
+            alert("✅ Waste recorded successfully!");
+            console.log("✅ Waste Record Response:", response.data);
         } catch (error) {
-            console.error("Error recording waste:", error.response?.data || error.message);
+            console.error("❌ Error recording waste:", error.response?.data || error.message);
         }
     };
+    
+    
 
     const styles = {
         container: {
@@ -143,7 +171,7 @@ function CookingManager({ userId }) {
 
     return (
         <div style={styles.container}>
-            <Navbar /> {/* ✅ Navbar for navigation */}
+            <Navbar /> 
 
             <h1 style={styles.title}>Cooking Manager</h1>
 
